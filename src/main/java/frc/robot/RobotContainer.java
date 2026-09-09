@@ -4,11 +4,27 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOTalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class RobotContainer {
+
+  private final Indexer indexer;
+
   public RobotContainer() {
+
+    if (RobotBase.isReal()) {
+      indexer = new Indexer(new IndexerIOTalonFX());
+    } else {
+      indexer = new Indexer(new IndexerIOSim());
+    }
+
+    indexer.setDefaultCommand(indexer.enableCommand());
+
     configureBindings();
   }
 

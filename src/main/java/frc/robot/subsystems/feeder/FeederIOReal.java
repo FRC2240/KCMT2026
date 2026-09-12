@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain.Feeder;
+package frc.robot.subsystems.feeder;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -12,7 +12,7 @@ public class FeederIOReal implements FeederIO {
     private StatusSignal<AngularVelocity> velocity = feedMotor.getVelocity();
     private VelocityTorqueCurrentFOC velocityControl = new VelocityTorqueCurrentFOC(0);
 
-    private FeederIOReal() {
+    public FeederIOReal() {
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kP = 2;
         config.CurrentLimits.StatorCurrentLimit = 50;

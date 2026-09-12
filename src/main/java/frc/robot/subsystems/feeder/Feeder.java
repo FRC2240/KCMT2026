@@ -1,6 +1,15 @@
 package frc.robot.subsystems.feeder;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.function.Supplier;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -14,12 +23,12 @@ private FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged ();
     
  }
 
- @Overide
+ @Override
  public void periodic() {
-   io.updateInputs(inputs);
-  Logger.processInputs{
-    "Feeder", inputs
-  };
+  io.updateInputs(inputs);
+  Logger.processInputs(
+  "Feeder", inputs
+  );
  }
 
  public void setVelocity(AngularVelocity velocity) {

@@ -27,9 +27,10 @@ public class IndexerIOTalonFX implements IndexerIO {
 
         motor.getConfigurator().apply(conf);
     }
+
     @Override
     public void updateInputs(IndexerIOInputs inputs) {
-        BaseStatusSignal.refreshAll(velocity,statorCurrent,supplyCurrent);
+        BaseStatusSignal.refreshAll(velocity, statorCurrent, supplyCurrent);
         inputs.indexerSpinVelocity = velocity.getValue();
         inputs.statorCurrent = statorCurrent.getValue();
         inputs.supplyCurrent = supplyCurrent.getValue();

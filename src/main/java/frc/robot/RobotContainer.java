@@ -5,6 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.feeder.FeederIOReal;
+import frc.robot.subsystems.feeder.FeederSimIO;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
@@ -13,16 +16,21 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class RobotContainer {
 
+
   private final Indexer indexer;
+  private final Feeder feeder;
 
   public RobotContainer() {
 
     if (RobotBase.isReal()) {
       indexer = new Indexer(new IndexerIOTalonFX());
+      feeder = new Feeder(new FeederIOReal());
     } else {
       indexer = new Indexer(new IndexerIOSim());
+      feeder = new Feeder(new FeederSimIO());
     }
 
+    feeder.setDefaultCommand(feeder.enableCommand());
     indexer.setDefaultCommand(indexer.enableCommand());
 
     configureBindings();
@@ -33,4 +41,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
   }
+
 }

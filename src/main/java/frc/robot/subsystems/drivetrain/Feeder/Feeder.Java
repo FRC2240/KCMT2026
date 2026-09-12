@@ -9,7 +9,6 @@ public class Feeder extends SubsystemBase {
 private FeederIO io;
 private FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged ();
 
-
  public Feeder(FeederIO io) {
     this.io = io;
     
@@ -19,12 +18,12 @@ private FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged ();
  public void periodic() {
    io.updateInputs(inputs);
   Logger.processInputs{
-    "feeder", inputs
+    "Feeder", inputs
   };
  }
 
  public void setVelocity(AngularVelocity velocity) {
-    io.setVelocity;
+    io.setVelocity(velocity);
  }
 
  public Command setVelocityCommand(Supplier<AngularVelocity> velocity) {

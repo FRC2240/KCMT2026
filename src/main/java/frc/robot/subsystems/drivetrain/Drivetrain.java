@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drivetrain;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
@@ -12,16 +13,23 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 
 public class Drivetrain extends SubsystemBase {
 
-  
+  private final Field2d field = new Field2d();
 
   private final ModuleIO moduleIOs[] = new ModuleIO[4];
-  private ModuleIOInputsAutoLogged moduleInputs[] = new ModuleIOInputsAutoLogged[4];
+  private ModuleIOInputsAutoLogged moduleInputs[] = new ModuleIOInputsAutoLogged[] {
+    new ModuleIOInputsAutoLogged(),
+    new ModuleIOInputsAutoLogged(),
+    new ModuleIOInputsAutoLogged(),
+    new ModuleIOInputsAutoLogged()
+  };
 
   private final GyroIO gyroIO;
   private GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -55,12 +63,17 @@ public class Drivetrain extends SubsystemBase {
     moduleIOs[3] = backRightModuleIO;
 
     this.gyroIO = gyroIO;
+    
+    SmartDashboard.putData(field);
+
 
     OdometryThread.getInstance().start();
   }
 
   @Override
   public void periodic() {
+    OdometryThread.getInstance().lock();
+
     // Update inputs
     for (int i = 0; i < 4; i++) {
       moduleIOs[i].updateInputs(moduleInputs[i]);
@@ -70,19 +83,28 @@ public class Drivetrain extends SubsystemBase {
     gyroIO.updateInputs(gyroInputs);
     Logger.processInputs("Gyro", gyroInputs);
 
+    OdometryThread.getInstance().unlock();
+
     for (int i = 0; i < moduleInputs[0].timestamps.length; i++) {
+
       poseEstimator.updateWithTime(gyroInputs.timestamps[i], gyroInputs.samples[i], new SwerveModulePosition[] {
         moduleInputs[0].positionSamples[i],
         moduleInputs[1].positionSamples[i],
         moduleInputs[2].positionSamples[i],
         moduleInputs[3].positionSamples[i],
       });
-    }  
-  
+
+    }
+    
+    field.setRobotPose(poseEstimator.getEstimatedPosition());
   }
 
-  public Command driveCommand(Supplier<ChassisSpeeds>[] speedSuppliers) {
-    assert(speedSuppliers.length > 0);
+  public Command driveCommand(Supplier<ChassisSpeeds> speedSupplier) {
+    return driveCommand(List.of(speedSupplier));
+  }
+
+  public Command driveCommand(List<Supplier<ChassisSpeeds>> speedSuppliers) {
+    assert(speedSuppliers.size() > 0);
     return run(() -> {
       // Sum up the inputs
       ChassisSpeeds targetFieldRelativeSpeed = new ChassisSpeeds(0,0,0);

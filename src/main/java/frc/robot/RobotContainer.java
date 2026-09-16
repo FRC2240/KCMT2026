@@ -18,6 +18,9 @@ import frc.robot.subsystems.drivetrain.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -27,12 +30,17 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
 
   private final Indexer indexer;
+  private final Shooter shooter;
   private final Drivetrain drivetrain;
 
   public RobotContainer() {
 
     if (RobotBase.isReal()) {
       indexer = new Indexer(new IndexerIOTalonFX());
+      shooter = new Shooter(new ShooterIOTalonFX());
+    } else {
+      indexer = new Indexer(new IndexerIOSim());
+      shooter = new Shooter(new ShooterIOSim());
       drivetrain = new Drivetrain(
         new ModuleIOTalonFX(TunerConstants.FrontLeft),
         new ModuleIOTalonFX(TunerConstants.FrontRight),
@@ -53,6 +61,7 @@ public class RobotContainer {
 
 
     indexer.setDefaultCommand(indexer.enableCommand());
+    shooter.setDefaultCommand(shooter.enableCommand());
     drivetrain.setDefaultCommand(DriveCommands.controlDrivetrainWithController(drivetrain, controller));
 
     configureBindings();

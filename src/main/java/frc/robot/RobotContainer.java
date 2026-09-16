@@ -11,9 +11,9 @@ import frc.robot.subsystems.feeder.FeederSimIO;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -21,21 +21,21 @@ public class RobotContainer {
 
 
   private final Indexer indexer;
-  private final Feeder feeder;
+  private final Shooter shooter;
 
   public RobotContainer() {
 
     if (RobotBase.isReal()) {
       indexer = new Indexer(new IndexerIOTalonFX());
-      feeder = new Feeder(new FeederIOReal());
+      shooter = new Shooter(new ShooterIOTalonFX());
     } else {
       indexer = new Indexer(new IndexerIOSim());
-      feeder = new Feeder(new FeederSimIO());
+      shooter = new Shooter(new ShooterIOSim());
     }
 
     feeder.setDefaultCommand(feeder.enableCommand());
     indexer.setDefaultCommand(indexer.enableCommand());
-    intake.setDefaultCommand(intake.reverseIntakeCommand());
+    shooter.setDefaultCommand(shooter.enableCommand());
 
     configureBindings();
   }

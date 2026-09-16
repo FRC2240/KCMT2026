@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.RobotController;
 public class OdometryThread extends Thread {
   private static OdometryThread instance = null;
 
-  private ReentrantLock lock;
+  private ReentrantLock lock = new ReentrantLock();
 
   private ArrayList<BaseStatusSignal> signals = new ArrayList<>();
   private ArrayList<Queue<Double>> dataQueues = new ArrayList<>();
@@ -60,7 +60,7 @@ public class OdometryThread extends Thread {
       unlock();
     }
 
-    return null;
+    return queue;
   }
 
   @Override

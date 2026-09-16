@@ -17,6 +17,8 @@ public interface IntakeRollerIO {
         public AngularVelocity followerSpinVelocity;
         public Current followerStatorCurrent;
         public Current followerSupplyCurrent;
+
+        public String state;
     }
 
     public default void updateInputs(IntakeRollerIOInputs inputs) {}

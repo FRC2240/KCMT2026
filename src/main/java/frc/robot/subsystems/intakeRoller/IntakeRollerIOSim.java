@@ -24,6 +24,7 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
     private final TalonFX intakeMotor = new TalonFX(IntakeRollerConstants.INTAKE_MOTOR_ID);
     private final TalonFX intakeFollower = new TalonFX(IntakeRollerConstants.INTAKE_MOTOR_FOLLOWER_ID);
     public final TalonFXSimState motorSim = intakeMotor.getSimState();
+    private final TalonFXSimState intakeFollowerSim = intakeFollower.getSimState();
 
     StatusSignal<AngularVelocity> intakeVelocity = intakeMotor.getVelocity();
     StatusSignal<Current> statorCurrent = intakeMotor.getStatorCurrent();
@@ -35,10 +36,10 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
 
     DCMotorSim dcMotorSim = new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                    DCMotor.getKrakenX60(1),
+                    DCMotor.getKrakenX60(2),
                     0.01,
                     kGearRatio),
-            DCMotor.getKrakenX60(1));
+            DCMotor.getKrakenX60(2));
 
     public IntakeRollerIOSim() {
         TalonFXConfiguration conf = new TalonFXConfiguration();
@@ -56,7 +57,9 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
     @Override
     public void updateInputs(IntakeRollerIOInputs inputs) {
 
-        motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+        double batteryVoltage = RobotController.getBatteryVoltage();
+        motorSim.setSupplyVoltage(batteryVoltage);
+        intakeFollowerSim.setSupplyVoltage(batteryVoltage);
 
         double voltage = motorSim.getMotorVoltage();
 
@@ -66,7 +69,10 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
         motorSim.setRawRotorPosition(dcMotorSim.getAngularPosition().times(kGearRatio));
         motorSim.setRotorVelocity(dcMotorSim.getAngularVelocity().times(kGearRatio));
 
-        BaseStatusSignal.refreshAll(intakeVelocity, statorCurrent, supplyCurrent);
+        intakeFollowerSim.setRawRotorPosition(dcMotorSim.getAngularPosition().times(kGearRatio));
+        intakeFollowerSim.setRotorVelocity(dcMotorSim.getAngularVelocity().times(kGearRatio));
+
+        BaseStatusSignal.refreshAll(intakeVelocity, statorCurrent, supplyCurrent, followerVelocity, followerStatorCurrent, followerSupplyCurrent);
         inputs.intakeSpinVelocity = intakeVelocity.getValue();
         inputs.intakeStatorCurrent = statorCurrent.getValue();
         inputs.intakeSupplyCurrent = supplyCurrent.getValue();

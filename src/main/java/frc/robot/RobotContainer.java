@@ -30,6 +30,7 @@ public class RobotContainer {
     }
 
     indexer.setDefaultCommand(indexer.enableCommand());
+    intake.setDefaultCommand(intake.reverseIntakeCommand());
 
     configureBindings();
   }

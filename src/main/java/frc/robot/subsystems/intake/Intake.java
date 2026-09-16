@@ -6,30 +6,28 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
-
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.indexer.IndexerIO;
-import frc.robot.subsystems.indexer.IndexerIOInputsAutoLogged;
 
 public class Intake extends SubsystemBase {
-    private IndexerIO io;
-    private IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+    private IntakeIO io;
+    private IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
     private String state = "None";
 
-    public Intake(IntakeIO inputs) {
+    public Intake(IntakeIO io) {
         this.io = io;
     }
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        inputs.state = state;
+
         Logger.processInputs("Intake", inputs);
     }
 
@@ -65,7 +63,7 @@ public class Intake extends SubsystemBase {
                 }));
     }
 */ 
-// commented out until drivetrain/utils are implemented
+// commented out until drivetrain/utils are in the code
  
     public Command disableIntakeCommand() {
         return setIntakeVelocityCommand(RotationsPerSecond.of(0)).andThen(run(() -> {

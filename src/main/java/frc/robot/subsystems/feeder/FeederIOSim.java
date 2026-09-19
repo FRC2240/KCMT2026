@@ -1,7 +1,5 @@
 package frc.robot.subsystems.feeder;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -12,11 +10,10 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class FeederSimIO implements FeederIO{
+public class FeederIOSim implements FeederIO{
 
     public double kGearRatio = 1;
 
@@ -34,7 +31,7 @@ public class FeederSimIO implements FeederIO{
                     kGearRatio),
             DCMotor.getKrakenX60(1));
 
-            public FeederSimIO() {
+            public FeederIOSim() {
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kP = 2;
         config.CurrentLimits.StatorCurrentLimit = 50;

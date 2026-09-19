@@ -8,6 +8,9 @@ import java.util.List;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.feeder.FeederIOReal;
+import frc.robot.subsystems.feeder.FeederSimIO;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drivetrain.DriveCommands;
 import frc.robot.subsystems.drivetrain.Drivetrain;
@@ -15,6 +18,7 @@ import frc.robot.subsystems.drivetrain.GyroIO;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon2;
 import frc.robot.subsystems.drivetrain.ModuleIO;
 import frc.robot.subsystems.drivetrain.ModuleIOTalonFX;
+
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
@@ -27,16 +31,23 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
 
-  private final CommandXboxController controller = new CommandXboxController(0);
+
 
   private final Indexer indexer;
+  private final Feeder feeder;
+
+  private final CommandXboxController controller = new CommandXboxController(0);
+
+
   private final Shooter shooter;
   private final Drivetrain drivetrain;
+
 
   public RobotContainer() {
 
  if (RobotBase.isReal()) {
       indexer = new Indexer(new IndexerIOTalonFX());
+      feeder = new Feeder(new FeederIOReal());
       shooter = new Shooter(new ShooterIOTalonFX());
       drivetrain = new Drivetrain(
         new ModuleIOTalonFX(TunerConstants.FrontLeft),
@@ -60,7 +71,9 @@ public class RobotContainer {
 
 
 
+
     indexer.setDefaultCommand(indexer.enableCommand());
+    feeder.setDefaultCommand(feeder.enableCommand());
     shooter.setDefaultCommand(shooter.enableCommand());
     drivetrain.setDefaultCommand(DriveCommands.controlDrivetrainWithController(drivetrain, controller));
 
@@ -74,4 +87,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
   }
+
 }

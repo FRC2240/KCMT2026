@@ -82,5 +82,9 @@ public class Intake extends SubsystemBase {
             state = "Slow";
         }));
     }
+
+    public Command ReverseIntakeCommand() {
+        return runOnce(() -> setIntakeVelocityCommand(RotationsPerSecond.of(-1)));
+    }
 }
 

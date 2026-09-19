@@ -13,6 +13,7 @@ public final class BuildConstants {
   public static final String GIT_BRANCH = "Feeder-implemntation";
   public static final String BUILD_DATE = "2026-09-12 15:41:39 EDT";
   public static final long BUILD_UNIX_TIME = 1789242099732L;
+
   public static final int DIRTY = 1;
 
   private BuildConstants(){}

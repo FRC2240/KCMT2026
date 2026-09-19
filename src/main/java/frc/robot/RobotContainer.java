@@ -35,12 +35,9 @@ public class RobotContainer {
 
   public RobotContainer() {
 
-    if (RobotBase.isReal()) {
+ if (RobotBase.isReal()) {
       indexer = new Indexer(new IndexerIOTalonFX());
       shooter = new Shooter(new ShooterIOTalonFX());
-    } else {
-      indexer = new Indexer(new IndexerIOSim());
-      shooter = new Shooter(new ShooterIOSim());
       drivetrain = new Drivetrain(
         new ModuleIOTalonFX(TunerConstants.FrontLeft),
         new ModuleIOTalonFX(TunerConstants.FrontRight),
@@ -50,6 +47,7 @@ public class RobotContainer {
       );
     } else {
       indexer = new Indexer(new IndexerIOSim());
+      shooter = new Shooter(new ShooterIOSim());
       drivetrain = new Drivetrain(
         new ModuleIO() {},
         new ModuleIO() {},
@@ -58,6 +56,8 @@ public class RobotContainer {
         new GyroIO() {}
       );
     }
+
+
 
 
     indexer.setDefaultCommand(indexer.enableCommand());

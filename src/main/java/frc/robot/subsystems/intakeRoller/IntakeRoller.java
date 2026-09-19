@@ -73,5 +73,9 @@ public class IntakeRoller extends SubsystemBase {
     public Command slowReverseIntakeCommand() {
         return setIntakeVelocityCommand(RotationsPerSecond.of(1));
     }
+
+    public Command ReverseIntakeCommand() {
+        return runOnce(() -> setIntakeVelocityCommand(RotationsPerSecond.of(-1)));
+    }
 }
 

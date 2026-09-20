@@ -1,7 +1,6 @@
 package frc.robot.subsystems.diagnostics;
 
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.subsystems.diagnostics.DiagnosticsIO.DiagnosticsIOInputs;
 
 public class DiagnosticsIOReal implements DiagnosticsIO {
     @Override

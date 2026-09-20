@@ -155,11 +155,23 @@ public class Drivetrain extends SubsystemBase {
       ChassisSpeeds targetRobotRelativeSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(targetFieldRelativeSpeed, poseEstimator.getEstimatedPosition().getRotation());
       ChassisSpeeds discretizedSpeeds = ChassisSpeeds.discretize(targetRobotRelativeSpeed, 0.02);
       SwerveModuleState[] targetStates = kinematics.toSwerveModuleStates(discretizedSpeeds);
-      SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, DriveConstants.MAX_SPEED);
 
-      // Optimize and apply
+      // Optimize and find the cosine scale factor
+      double currentScale = 1;
       for (int i = 0; i < moduleIOs.length; i++) {
         targetStates[i].optimize(moduleInputs[i].position.angle);
+        currentScale = Math.min(currentScale, Math.abs(moduleIOs[i].getHeading().minus(targetStates[i].angle).getCos()));
+      }
+
+      // Scale all motors down
+      for (int i = 0; i < moduleIOs.length; i++) { 
+        targetStates[i].speedMetersPerSecond *= currentScale;
+      }
+
+      SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, DriveConstants.MAX_SPEED);
+
+      // Apply
+      for (int i = 0; i < moduleIOs.length; i++) {
         moduleIOs[i].setState(targetStates[i]);
       }
     });

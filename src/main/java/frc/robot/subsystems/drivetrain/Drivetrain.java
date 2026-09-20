@@ -76,7 +76,6 @@ public class Drivetrain extends SubsystemBase {
     
     SmartDashboard.putData(field);
 
-
     OdometryThread.getInstance().start();
   }
 
@@ -171,5 +170,17 @@ public class Drivetrain extends SubsystemBase {
         moduleIOs[i].setState(targetStates[i]);
       }
     });
+  }
+
+  public Pose2d getPose() {
+    return poseEstimator.getEstimatedPosition();
+  }
+
+  public Translation2d getTranslation() {
+    return getPose().getTranslation();
+  }
+
+  public Rotation2d getRotation() {
+    return getPose().getRotation();
   }
 }

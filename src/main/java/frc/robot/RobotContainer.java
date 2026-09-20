@@ -17,6 +17,7 @@ import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIO;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon2;
 import frc.robot.subsystems.drivetrain.ModuleIO;
+import frc.robot.subsystems.drivetrain.ModuleIOSim;
 import frc.robot.subsystems.drivetrain.ModuleIOTalonFX;
 
 import frc.robot.subsystems.indexer.Indexer;
@@ -55,14 +56,10 @@ public class RobotContainer {
       shooter = new Shooter(new ShooterIOSim());
       feeder = new Feeder(new FeederIOSim());
       drivetrain = new Drivetrain(
-          new ModuleIO() {
-          },
-          new ModuleIO() {
-          },
-          new ModuleIO() {
-          },
-          new ModuleIO() {
-          },
+          new ModuleIOSim(),
+          new ModuleIOSim(),
+          new ModuleIOSim(),
+          new ModuleIOSim(),
           new GyroIO() {
           });
     }

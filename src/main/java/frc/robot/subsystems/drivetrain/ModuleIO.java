@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 public interface ModuleIO {
   @AutoLog
   public class ModuleIOInputs {
+    public SwerveModuleState state;
     public SwerveModulePosition position;
     public SwerveModulePosition[] positionSamples; 
     public double[] timestamps;

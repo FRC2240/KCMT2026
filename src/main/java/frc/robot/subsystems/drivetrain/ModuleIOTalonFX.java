@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drivetrain;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import java.util.Queue;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -20,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.generated.TunerConstants;
 
 public class ModuleIOTalonFX implements ModuleIO {
@@ -31,6 +34,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final PositionTorqueCurrentFOC turnPositionRequest = new PositionTorqueCurrentFOC(0);
 
   private final StatusSignal<Angle> drivePosition;
+  private final StatusSignal<AngularVelocity> driveVelocity;
   private final StatusSignal<Angle> turnPosition;
 
   private final Queue<Double> driveSamples;
@@ -47,9 +51,10 @@ public class ModuleIOTalonFX implements ModuleIO {
     encoder = new CANcoder(constants.EncoderId, TunerConstants.kCANBus);
 
     drivePosition = driveMotor.getPosition();
+    driveVelocity = driveMotor.getVelocity();
     turnPosition = turnMotor.getPosition();
 
-    StatusSignal.setUpdateFrequencyForAll(250.0, drivePosition, turnPosition);
+    StatusSignal.setUpdateFrequencyForAll(250.0, drivePosition, turnPosition, driveVelocity);
 
     TalonFXConfiguration driveConfig = constants.DriveMotorInitialConfigs;
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -99,6 +104,8 @@ public class ModuleIOTalonFX implements ModuleIO {
       drivePosition.getValueAsDouble() * constants.WheelRadius,
       Rotation2d.fromRotations(turnPosition.getValueAsDouble())
     );
+
+    inputs.state = new SwerveModuleState(MetersPerSecond.of(driveVelocity.getValueAsDouble() * constants.WheelRadius), Rotation2d.fromRotations(turnPosition.getValueAsDouble()));
     
 
     if (driveSamples.size() == turnSamples.size() && turnSamples.size() == timestamps.size()) {

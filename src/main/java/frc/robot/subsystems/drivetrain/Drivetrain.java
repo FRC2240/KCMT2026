@@ -9,10 +9,13 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,6 +55,18 @@ public class Drivetrain extends SubsystemBase {
     Pose2d.kZero
   );
 
+  private final SwerveModulePosition[] lastPositions = new SwerveModulePosition[] {
+    new SwerveModulePosition(),
+    new SwerveModulePosition(),
+    new SwerveModulePosition(),
+    new SwerveModulePosition()
+  };
+
+  private Rotation2d heading = Rotation2d.kZero;
+
+  private StructArrayPublisher<SwerveModuleState> swerveModuleStatePublisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
+
   public Drivetrain(ModuleIO frontLeftModuleIO,
       ModuleIO frontRightModuleIO,
       ModuleIO backLeftModuleIO,
@@ -86,17 +101,41 @@ public class Drivetrain extends SubsystemBase {
     OdometryThread.getInstance().unlock();
 
     for (int i = 0; i < moduleInputs[0].timestamps.length; i++) {
+      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+        modulePositions[moduleIndex] = moduleInputs[moduleIndex].positionSamples[i];
+        moduleDeltas[moduleIndex] =
+            new SwerveModulePosition(
+                modulePositions[moduleIndex].distanceMeters - lastPositions[moduleIndex].distanceMeters,
+                modulePositions[moduleIndex].angle);
+        lastPositions[moduleIndex] = modulePositions[moduleIndex];
+      }
 
-      poseEstimator.updateWithTime(gyroInputs.timestamps[i], gyroInputs.samples[i], new SwerveModulePosition[] {
+      if (gyroInputs.connected) {
+        heading = gyroInputs.samples[i];
+      } else {
+        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+        heading = heading.plus(new Rotation2d(twist.dtheta));
+      }
+      
+      poseEstimator.updateWithTime(moduleInputs[0].timestamps[i], heading, new SwerveModulePosition[] {
         moduleInputs[0].positionSamples[i],
         moduleInputs[1].positionSamples[i],
         moduleInputs[2].positionSamples[i],
         moduleInputs[3].positionSamples[i],
       });
-
     }
     
-    field.setRobotPose(poseEstimator.getEstimatedPosition());
+    swerveModuleStatePublisher.set(new SwerveModuleState[] {
+      moduleInputs[0].state,
+      moduleInputs[1].state,
+      moduleInputs[2].state,
+      moduleInputs[3].state,
+    });
+
+
+    Logger.recordOutput("Robot Position", poseEstimator.getEstimatedPosition());
   }
 
   public Command driveCommand(Supplier<ChassisSpeeds> speedSupplier) {
@@ -116,11 +155,11 @@ public class Drivetrain extends SubsystemBase {
       ChassisSpeeds targetRobotRelativeSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(targetFieldRelativeSpeed, poseEstimator.getEstimatedPosition().getRotation());
       ChassisSpeeds discretizedSpeeds = ChassisSpeeds.discretize(targetRobotRelativeSpeed, 0.02);
       SwerveModuleState[] targetStates = kinematics.toSwerveModuleStates(discretizedSpeeds);
-      SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, 3);
+      SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, DriveConstants.MAX_SPEED);
 
       // Optimize and apply
       for (int i = 0; i < moduleIOs.length; i++) {
-        targetStates[i].optimize(moduleIOs[i].getHeading());
+        targetStates[i].optimize(moduleInputs[i].position.angle);
         moduleIOs[i].setState(targetStates[i]);
       }
     });

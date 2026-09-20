@@ -14,8 +14,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -64,9 +62,6 @@ public class Drivetrain extends SubsystemBase {
 
   private Rotation2d heading = Rotation2d.kZero;
 
-  private StructArrayPublisher<SwerveModuleState> swerveModuleStatePublisher = NetworkTableInstance.getDefault()
-      .getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
-
   public Drivetrain(ModuleIO frontLeftModuleIO,
       ModuleIO frontRightModuleIO,
       ModuleIO backLeftModuleIO,
@@ -87,9 +82,9 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Update inputs
     OdometryThread.getInstance().lock();
 
-    // Update inputs
     for (int i = 0; i < 4; i++) {
       moduleIOs[i].updateInputs(moduleInputs[i]);
       Logger.processInputs("Module " + i, moduleInputs[i]);
@@ -100,6 +95,7 @@ public class Drivetrain extends SubsystemBase {
 
     OdometryThread.getInstance().unlock();
 
+    // Update Position Estimate
     for (int i = 0; i < moduleInputs[0].timestamps.length; i++) {
       SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
       SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
@@ -126,14 +122,14 @@ public class Drivetrain extends SubsystemBase {
         moduleInputs[3].positionSamples[i],
       });
     }
-    
-    swerveModuleStatePublisher.set(new SwerveModuleState[] {
+
+    // Log outputs
+    Logger.recordOutput("Swerve Module States", new SwerveModuleState[] {
       moduleInputs[0].state,
       moduleInputs[1].state,
       moduleInputs[2].state,
       moduleInputs[3].state,
     });
-
 
     Logger.recordOutput("Robot Position", poseEstimator.getEstimatedPosition());
   }

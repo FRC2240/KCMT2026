@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import java.util.List;
-
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.FeederIOReal;
@@ -16,7 +13,6 @@ import frc.robot.subsystems.drivetrain.DriveCommands;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIO;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon2;
-import frc.robot.subsystems.drivetrain.ModuleIO;
 import frc.robot.subsystems.drivetrain.ModuleIOSim;
 import frc.robot.subsystems.drivetrain.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;

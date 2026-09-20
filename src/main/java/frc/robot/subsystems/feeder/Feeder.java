@@ -1,6 +1,5 @@
 package frc.robot.subsystems.feeder;
 
-import com.ctre.phoenix6.hardware.TalonFX;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
@@ -8,9 +7,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 

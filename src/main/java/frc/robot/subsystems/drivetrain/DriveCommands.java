@@ -38,7 +38,7 @@ public class DriveCommands {
       return new ChassisSpeeds(
         MetersPerSecond.of(0), 
         MetersPerSecond.of(0), 
-        DriveConstants.MAX_ANGULAR_RATE.times(threshold(controller.getRightX(), 0.1))
+        DriveConstants.MAX_ANGULAR_RATE.times(threshold(controller.getRightX(), 0.1) * -1)
       );
     };
   }

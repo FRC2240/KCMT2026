@@ -21,9 +21,12 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.generated.TunerConstants;
 
 public class Drivetrain extends SubsystemBase {
+
+  public final DriveSuppliers suppliers;
 
   private final Field2d field = new Field2d();
 
@@ -69,7 +72,9 @@ public class Drivetrain extends SubsystemBase {
       ModuleIO frontRightModuleIO,
       ModuleIO backLeftModuleIO,
       ModuleIO backRightModuleIO,
-      GyroIO gyroIO) {
+      GyroIO gyroIO,
+      CommandXboxController controller
+    ) {
     moduleIOs[0] = frontLeftModuleIO;
     moduleIOs[1] = frontRightModuleIO;
     moduleIOs[2] = backLeftModuleIO;
@@ -77,6 +82,8 @@ public class Drivetrain extends SubsystemBase {
 
     this.gyroIO = gyroIO;
     
+    this.suppliers = new DriveSuppliers(this, controller);
+
     SmartDashboard.putData(field);
 
     OdometryThread.getInstance().start();
@@ -189,5 +196,11 @@ public class Drivetrain extends SubsystemBase {
 
   public Rotation2d getRotation() {
     return getPose().getRotation();
+  }
+
+
+  // Pre-made drive commands
+  public Command driveWithControllerCommand() {
+    return driveCommand(List.of(suppliers.controllerDrive(), suppliers.controllerTurn()));
   }
 }

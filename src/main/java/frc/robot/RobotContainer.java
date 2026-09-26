@@ -9,7 +9,6 @@ import frc.robot.subsystems.feeder.FeederIO;
 import frc.robot.subsystems.feeder.FeederIOReal;
 import frc.robot.subsystems.feeder.FeederIOSim;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drivetrain.DriveCommands;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIO;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon2;
@@ -42,6 +41,8 @@ public class RobotContainer {
 
   private final Shooter shooter;
   private final Drivetrain drivetrain;
+
+  @SuppressWarnings("unused")
   private final Vision vision;
 
   public RobotContainer() {
@@ -52,7 +53,8 @@ public class RobotContainer {
             new ModuleIOTalonFX(TunerConstants.FrontRight),
             new ModuleIOTalonFX(TunerConstants.BackLeft),
             new ModuleIOTalonFX(TunerConstants.BackRight),
-            new GyroIOPigeon2());
+            new GyroIOPigeon2(),
+            controller);
 
         vision = new Vision(
             drivetrain::addVisionMeasurement,
@@ -70,7 +72,8 @@ public class RobotContainer {
             new ModuleIOSim(),
             new ModuleIOSim(),
             new ModuleIOSim(),
-            new GyroIO() {});
+            new GyroIO() {},
+            controller);
 
         vision = new Vision(
           drivetrain::addVisionMeasurement, 
@@ -89,7 +92,8 @@ public class RobotContainer {
             new ModuleIO() {}, 
             new ModuleIO() {}, 
             new ModuleIO() {}, 
-            new GyroIO() {});
+            new GyroIO() {},
+            controller);
 
         vision = new Vision(
           drivetrain::addVisionMeasurement, 
@@ -106,14 +110,12 @@ public class RobotContainer {
     indexer.setDefaultCommand(indexer.enableCommand());
     feeder.setDefaultCommand(feeder.enableCommand());
     shooter.setDefaultCommand(shooter.enableCommand());
-    drivetrain.setDefaultCommand(DriveCommands.controlDrivetrainWithController(drivetrain, controller));
+    drivetrain.setDefaultCommand(drivetrain.driveWithControllerCommand());
 
     configureBindings();
   }
 
-  private void configureBindings() {
-
-  }
+  private void configureBindings() {}
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");

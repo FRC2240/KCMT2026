@@ -66,6 +66,8 @@ public class Drivetrain extends SubsystemBase {
     new SwerveModulePosition()
   };
 
+  private ChassisSpeeds currentRobotRelativeChassisSpeeds;
+
   private Rotation2d heading = Rotation2d.kZero;
 
   public Drivetrain(ModuleIO frontLeftModuleIO,
@@ -132,13 +134,17 @@ public class Drivetrain extends SubsystemBase {
       });
     }
 
-    // Log outputs
-    Logger.recordOutput("Swerve Module States", new SwerveModuleState[] {
+    SwerveModuleState[] moduleStates = new SwerveModuleState[] {
       moduleInputs[0].state,
       moduleInputs[1].state,
       moduleInputs[2].state,
       moduleInputs[3].state,
-    });
+    };
+    // Calculate current chassis speeds
+    currentRobotRelativeChassisSpeeds = kinematics.toChassisSpeeds(moduleStates); 
+
+    // Log outputs
+    Logger.recordOutput("Swerve Module States", moduleStates);
 
     Logger.recordOutput("Robot Position", poseEstimator.getEstimatedPosition());
   }
@@ -196,6 +202,10 @@ public class Drivetrain extends SubsystemBase {
 
   public Rotation2d getRotation() {
     return getPose().getRotation();
+  }
+
+  public ChassisSpeeds getChassisSpeeds() {
+    return currentRobotRelativeChassisSpeeds;
   }
 
 

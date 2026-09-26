@@ -15,7 +15,6 @@ import frc.robot.subsystems.drivetrain.GyroIOPigeon2;
 import frc.robot.subsystems.drivetrain.ModuleIO;
 import frc.robot.subsystems.drivetrain.ModuleIOSim;
 import frc.robot.subsystems.drivetrain.ModuleIOTalonFX;
-
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;

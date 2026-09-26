@@ -19,6 +19,14 @@ import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
+import frc.robot.subsystems.intakePivot.IntakePivot;
+import frc.robot.subsystems.intakePivot.IntakePivotIO;
+import frc.robot.subsystems.intakePivot.IntakePivotIOReal;
+import frc.robot.subsystems.intakePivot.IntakePivotIOSim;
+import frc.robot.subsystems.intakeRoller.IntakeRoller;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIO;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIOSim;
+import frc.robot.subsystems.intakeRoller.IntakeRollerIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
@@ -33,16 +41,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
 
-  private final Indexer indexer;
-  private final Feeder feeder;
-
   private final CommandXboxController controller = new CommandXboxController(0);
-
-  private final Shooter shooter;
   private final Drivetrain drivetrain;
-
   @SuppressWarnings("unused")
   private final Vision vision;
+  private final Indexer indexer;
+  private final Shooter shooter;
+  private final Feeder feeder;
+  private final IntakePivot intakePivot;
+  private final IntakeRoller intakeRoller;
 
   public RobotContainer() {
     switch (Constants.mode) {
@@ -63,6 +70,8 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOTalonFX());
         shooter = new Shooter(new ShooterIOTalonFX());
         feeder = new Feeder(new FeederIOReal());
+        intakePivot = new IntakePivot(new IntakePivotIOReal());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX(), drivetrain);
 
         break;
       case SIM:
@@ -82,8 +91,10 @@ public class RobotContainer {
           indexer = new Indexer(new IndexerIOSim());
           shooter = new Shooter(new ShooterIOSim());
           feeder = new Feeder(new FeederIOSim());
-        break;
+          intakePivot = new IntakePivot(new IntakePivotIOSim());
+          intakeRoller = new IntakeRoller(new IntakeRollerIOSim(), drivetrain);
 
+        break;
       default:
       case REPLAY:
         drivetrain = new Drivetrain(
@@ -102,6 +113,8 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIO() {});
         feeder = new Feeder(new FeederIO() {});
+        intakePivot = new IntakePivot(new IntakePivotIO() {});
+        intakeRoller = new IntakeRoller(new IntakeRollerIO() {}, drivetrain);
 
         break;
     }
@@ -110,6 +123,7 @@ public class RobotContainer {
     feeder.setDefaultCommand(feeder.enableCommand());
     shooter.setDefaultCommand(shooter.enableCommand());
     drivetrain.setDefaultCommand(drivetrain.driveWithControllerCommand());
+
 
     configureBindings();
   }

@@ -123,5 +123,15 @@ public class DriveSuppliers {
     });
   }
 
+  public Supplier<ChassisSpeeds> trenchAlign() {
+    return rotateToRotation(() -> {
+      double currentRotation = Math.abs(drivetrain.getRotation().getDegrees());
+
+      if (currentRotation >= 90) {
+        return Rotation2d.fromDegrees(180);
+      }
+      return Rotation2d.fromDegrees(0);
+    });
+  }
   
 }

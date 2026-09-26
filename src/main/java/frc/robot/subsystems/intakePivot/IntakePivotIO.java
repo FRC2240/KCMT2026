@@ -6,7 +6,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 
-interface IntakePivotIO {
+public interface IntakePivotIO {
   @AutoLog
   class IntakePivotIOInputs {
     public AngularVelocity velocity;

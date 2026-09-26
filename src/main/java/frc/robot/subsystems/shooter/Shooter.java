@@ -45,4 +45,8 @@ public class Shooter extends SubsystemBase {
     public Command enableCommand() {
         return setVelocityCommand(RotationsPerSecond.of(10));
     }
+
+    public AngularVelocity getVelocity() {
+      return inputs.LeftLowerFlywheelVelocity;
+    }
 }

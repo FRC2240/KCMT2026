@@ -14,6 +14,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class DriveSuppliers {
@@ -133,5 +135,9 @@ public class DriveSuppliers {
       return Rotation2d.fromDegrees(0);
     });
   }
+
+  public Command toggleSlowModeCommand() {
+        return Commands.runOnce(() -> slowModeEnabled = !slowModeEnabled);
+    }
   
 }

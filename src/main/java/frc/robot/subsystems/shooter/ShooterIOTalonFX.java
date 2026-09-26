@@ -4,6 +4,7 @@ package frc.robot.subsystems.shooter;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -20,6 +21,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     private TalonFX rightFlywheelFollowerUpper  = new TalonFX(ShooterConstants.RIGHT_LOWER_FLYWHEEL_MOTOR_ID);
 
     private VelocityTorqueCurrentFOC request = new VelocityTorqueCurrentFOC(0);
+    private CoastOut coast = new CoastOut();
 
     StatusSignal <AngularVelocity> leftUpperVelocity = leftFlywheelMotor.getVelocity();
     StatusSignal <AngularVelocity> leftLowerVelocity = leftFlywheelFollower.getVelocity();
@@ -87,5 +89,10 @@ public class ShooterIOTalonFX implements ShooterIO {
     @Override
     public void setVelocity(AngularVelocity velocity) {
         leftFlywheelMotor.setControl(request.withVelocity(velocity));
+    }
+
+    @Override
+    public void coast() {
+        leftFlywheelMotor.setControl(coast);
     }
 }

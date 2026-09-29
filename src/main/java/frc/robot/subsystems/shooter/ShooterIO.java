@@ -28,4 +28,6 @@ public interface ShooterIO {
     public default void updateInputs(ShooterIOInputs inputs) {}
 
     public default void setVelocity(AngularVelocity velocity) {}
+
+    public default void coast() {}
 }

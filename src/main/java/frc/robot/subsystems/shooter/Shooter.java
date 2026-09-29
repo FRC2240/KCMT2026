@@ -39,6 +39,12 @@ public class Shooter extends SubsystemBase {
         return run(() -> io.setVelocity(velocity.get()));
     }
 
+    public Command coastCommand() {
+        return runOnce(() -> {
+            io.coast();
+        });
+    }
+
     public Command disableCommand() {
         return setVelocityCommand(RotationsPerSecond.of(0));
     }

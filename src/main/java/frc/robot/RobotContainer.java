@@ -36,6 +36,7 @@ import frc.robot.subsystems.vision.CameraIOLimelight;
 import frc.robot.subsystems.vision.CameraIOPhotonVisionSim;
 import frc.robot.subsystems.vision.Vision;
 
+import java.util.List;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -58,6 +59,7 @@ public class RobotContainer {
   private final Feeder feeder;
   private final IntakePivot intakePivot;
   private final IntakeRoller intakeRoller;
+  private final ShootingController shootingController;
 
   public RobotContainer() {
     switch (Constants.mode) {
@@ -80,6 +82,7 @@ public class RobotContainer {
         feeder = new Feeder(new FeederIOReal());
         intakePivot = new IntakePivot(new IntakePivotIOReal());
         intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX(), drivetrain);
+        shootingController = new ShootingController(drivetrain, shooter, feeder, indexer, intakePivot, intakeRoller);
 
         break;
       case SIM:
@@ -101,6 +104,7 @@ public class RobotContainer {
           feeder = new Feeder(new FeederIOSim());
           intakePivot = new IntakePivot(new IntakePivotIOSim());
           intakeRoller = new IntakeRoller(new IntakeRollerIOSim(), drivetrain);
+          shootingController = new ShootingController(drivetrain, shooter, feeder, indexer, intakePivot, intakeRoller);
 
         break;
       default:
@@ -123,6 +127,7 @@ public class RobotContainer {
         feeder = new Feeder(new FeederIO() {});
         intakePivot = new IntakePivot(new IntakePivotIO() {});
         intakeRoller = new IntakeRoller(new IntakeRollerIO() {}, drivetrain);
+        shootingController = new ShootingController(drivetrain, shooter, feeder, indexer, intakePivot, intakeRoller);
 
         break;
     }
@@ -132,7 +137,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.enableCommand());
     drivetrain.setDefaultCommand(drivetrain.driveWithControllerCommand());
 
-
+    configureDefaults();
     configureBindings();
     configureNamedCommands();
 
@@ -151,8 +156,51 @@ public class RobotContainer {
     NamedCommands.registerCommand("default", Commands.run(() -> {}, shooter));
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    // Disable Intake
+    controller.leftTrigger().toggleOnTrue(intakeRoller.disableIntakeCommand());
 
+    // Toggle Slow Mode
+    controller.back().onTrue(drivetrain.suppliers.toggleSlowModeCommand());
+/* 
+    // Zero the Gyro
+    controller.start().onTrue(drivetrain.rezeroGyro());
+*/
+    // Shoot
+    controller.rightTrigger().whileTrue(shootingController.shoot());
+
+    // Reverse Intake
+    controller.povDown().whileTrue(intakeRoller.reverseIntakeCommand());
+
+    // Pivot rezeroing
+    controller.rightBumper().onTrue(intakePivot.rezeroCommand());
+
+    // Contract Intake
+    controller.x().toggleOnTrue(intakePivot.contractCommand().alongWith(intakeRoller.disableIntakeCommand()));
+
+    // Align with Trench
+    controller.y().whileTrue(drivetrain.driveCommand(List.of(drivetrain.suppliers.controllerDrive(), 
+                drivetrain.suppliers.trenchAlign()))); }
+
+  private void configureDefaults() {
+   //Drive with Stick
+    drivetrain.setDefaultCommand(drivetrain.driveWithControllerCommand());
+
+    // indexer is disabled by default
+    indexer.setDefaultCommand(indexer.disableCommand());
+
+    // Intake is enabled by default
+    intakeRoller.setDefaultCommand(intakeRoller.enableIntakeCommand());
+
+    // Feeder is disabled by default
+    feeder.setDefaultCommand(feeder.disableCommand());
+
+    // Shooter coasts when not used (power saving)
+    shooter.setDefaultCommand(shooter.coastCommand());
+
+    // Pivot is extended by default
+    intakePivot.setDefaultCommand(intakePivot.extendCommand());
+    }
   public Command getAutonomousCommand() {
     Command autoCommand = autoChooser.get();
     if (autoCommand == null) autoCommand = Commands.print("Auto Started. No auto selected");

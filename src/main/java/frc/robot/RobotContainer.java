@@ -48,7 +48,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
 
-  private final LoggedDashboardChooser<Command> autoChooser;
+  private LoggedDashboardChooser<Command> autoChooser;
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private final Drivetrain drivetrain;
@@ -139,21 +139,20 @@ public class RobotContainer {
 
     configureDefaults();
     configureBindings();
-    configureNamedCommands();
-
-    autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
-
+    configurePathPlanner();
   }
 
-  private void configureNamedCommands() {
-    /*
+  private void configurePathPlanner() {
     NamedCommands.registerCommand("shoot", shootingController.shootIntoHub());
-        NamedCommands.registerCommand("default", Commands.parallel(intake.enableIntakeCommand(),
-                Commands.waitSeconds(0.25).andThen(intake.pivot.extendCommand()),
-                shooter.feeder.disableCommand(), shooter.coastCommand(), spindexer.disableCommand()));
-                 */
-    NamedCommands.registerCommand("shoot", Commands.run(() -> {}, shooter));
-    NamedCommands.registerCommand("default", Commands.run(() -> {}, shooter));
+    NamedCommands.registerCommand("default", Commands.parallel(
+                                                      intakeRoller.enableIntakeCommand(),
+                                                      Commands.waitSeconds(0.25).andThen(intakePivot.extendCommand()),
+                                                      feeder.disableCommand(),
+                                                      shooter.coastCommand(),
+                                                      indexer.disableCommand()
+                                                    ));
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
   }
 
   private void configureBindings() {

@@ -238,6 +238,12 @@ public class Drivetrain extends SubsystemBase {
     );
   }
 
+  public Command rezeroGyroCommand() {
+    return runOnce(() -> {
+      resetPose(new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), Rotation2d.kZero));
+    });
+  }
+
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }

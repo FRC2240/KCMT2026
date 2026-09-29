@@ -161,10 +161,10 @@ public class RobotContainer {
 
     // Toggle Slow Mode
     controller.back().onTrue(drivetrain.suppliers.toggleSlowModeCommand());
-/* 
+
     // Zero the Gyro
-    controller.start().onTrue(drivetrain.rezeroGyro());
-*/
+    controller.start().onTrue(drivetrain.rezeroGyroCommand());
+
     // Shoot
     controller.rightTrigger().whileTrue(shootingController.shoot());
 
@@ -179,7 +179,8 @@ public class RobotContainer {
 
     // Align with Trench
     controller.y().whileTrue(drivetrain.driveCommand(List.of(drivetrain.suppliers.controllerDrive(), 
-                drivetrain.suppliers.trenchAlign()))); }
+                drivetrain.suppliers.trenchAlign()))); 
+  }
 
   private void configureDefaults() {
    //Drive with Stick
@@ -199,11 +200,11 @@ public class RobotContainer {
 
     // Pivot is extended by default
     intakePivot.setDefaultCommand(intakePivot.extendCommand());
-    }
+  }
+
   public Command getAutonomousCommand() {
     Command autoCommand = autoChooser.get();
     if (autoCommand == null) autoCommand = Commands.print("Auto Started. No auto selected");
     return autoCommand;
-    
   }
 }

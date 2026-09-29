@@ -37,12 +37,18 @@ import frc.robot.subsystems.vision.CameraIOPhotonVisionSim;
 import frc.robot.subsystems.vision.Vision;
 
 import java.util.List;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
+
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private final Drivetrain drivetrain;
@@ -133,6 +139,21 @@ public class RobotContainer {
 
     configureDefaults();
     configureBindings();
+    configureNamedCommands();
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
+
+  }
+
+  private void configureNamedCommands() {
+    /*
+    NamedCommands.registerCommand("shoot", shootingController.shootIntoHub());
+        NamedCommands.registerCommand("default", Commands.parallel(intake.enableIntakeCommand(),
+                Commands.waitSeconds(0.25).andThen(intake.pivot.extendCommand()),
+                shooter.feeder.disableCommand(), shooter.coastCommand(), spindexer.disableCommand()));
+                 */
+    NamedCommands.registerCommand("shoot", Commands.run(() -> {}, shooter));
+    NamedCommands.registerCommand("default", Commands.run(() -> {}, shooter));
   }
 
   private void configureBindings() {
@@ -181,7 +202,9 @@ public class RobotContainer {
     intakePivot.setDefaultCommand(intakePivot.extendCommand());
     }
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    Command autoCommand = autoChooser.get();
+    if (autoCommand == null) autoCommand = Commands.print("Auto Started. No auto selected");
+    return autoCommand;
+    
   }
-
 }

@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 
 public class ModuleIOSim implements ModuleIO {
@@ -18,14 +19,17 @@ public class ModuleIOSim implements ModuleIO {
     double dt = currentTime - lastTime;
     lastTime = currentTime;
 
-    position.distanceMeters += currentState.speedMetersPerSecond * dt;
-    position.angle = currentState.angle;
+    // Simulate module steering to target angle (or set directly for simple sim)
+    if (DriverStation.isEnabled()) {
+      position.angle = currentState.angle;
+      position.distanceMeters += currentState.speedMetersPerSecond * dt;
+    }
 
     SwerveModulePosition currentCopy = new SwerveModulePosition(position.distanceMeters, position.angle);
     inputs.position = currentCopy;
     inputs.positionSamples = new SwerveModulePosition[] { currentCopy };
     inputs.timestamps = new double[] { Logger.getTimestamp() };
-    inputs.state = currentState;
+    inputs.state = new SwerveModuleState(currentState.speedMetersPerSecond, position.angle);
   }
 
   public void setState(SwerveModuleState state) {
@@ -33,6 +37,6 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   public Rotation2d getHeading() {
-    return currentState.angle;
+    return position.angle;
   }
 }

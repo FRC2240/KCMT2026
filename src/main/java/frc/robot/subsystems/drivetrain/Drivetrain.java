@@ -5,6 +5,11 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,8 +22,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -27,8 +32,6 @@ import frc.robot.generated.TunerConstants;
 public class Drivetrain extends SubsystemBase {
 
   public final DriveSuppliers suppliers;
-
-  private final Field2d field = new Field2d();
 
   private final ModuleIO moduleIOs[] = new ModuleIO[4];
   private ModuleIOInputsAutoLogged moduleInputs[] = new ModuleIOInputsAutoLogged[] {
@@ -40,6 +43,7 @@ public class Drivetrain extends SubsystemBase {
 
   private final GyroIO gyroIO;
   private GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  private Rotation2d rawGyroRotation = Rotation2d.kZero;
 
   private static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
       new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
@@ -66,9 +70,7 @@ public class Drivetrain extends SubsystemBase {
     new SwerveModulePosition()
   };
 
-  private ChassisSpeeds currentRobotRelativeChassisSpeeds;
-
-  private Rotation2d heading = Rotation2d.kZero;
+  private ChassisSpeeds currentRobotRelativeChassisSpeeds = new ChassisSpeeds();
 
   public Drivetrain(ModuleIO frontLeftModuleIO,
       ModuleIO frontRightModuleIO,
@@ -77,18 +79,39 @@ public class Drivetrain extends SubsystemBase {
       GyroIO gyroIO,
       CommandXboxController controller
     ) {
-    moduleIOs[0] = frontLeftModuleIO;
-    moduleIOs[1] = frontRightModuleIO;
-    moduleIOs[2] = backLeftModuleIO;
-    moduleIOs[3] = backRightModuleIO;
-
+    this.moduleIOs[0] = frontLeftModuleIO;
+    this.moduleIOs[1] = frontRightModuleIO;
+    this.moduleIOs[2] = backLeftModuleIO;
+    this.moduleIOs[3] = backRightModuleIO;
     this.gyroIO = gyroIO;
-    
     this.suppliers = new DriveSuppliers(this, controller);
 
-    SmartDashboard.putData(field);
+    setupPathPlanner();
 
     OdometryThread.getInstance().start();
+  }
+
+  private void setupPathPlanner() {
+    RobotConfig config;
+    try {
+      config = RobotConfig.fromGUISettings();
+      AutoBuilder.configure(
+              this::getPose,
+              this::resetPose,
+              this::getChassisSpeeds,
+              (speeds, feedforwards) -> driveRobotRelative(speeds),
+              new PPHolonomicDriveController(
+                      new PIDConstants(2.0, 0.0, 0.10), // Translation PID constants
+                      new PIDConstants(2.0, 0.0, 0.10) // Rotation PID constants
+              ),
+              config,
+              () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red),
+              this);
+    } catch (Exception e) {
+      // Handle exception as needed
+      System.out.println("error");
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -120,13 +143,13 @@ public class Drivetrain extends SubsystemBase {
       }
 
       if (gyroInputs.connected) {
-        heading = gyroInputs.samples[i];
+        rawGyroRotation = gyroInputs.samples[i];
       } else {
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        heading = heading.plus(new Rotation2d(twist.dtheta));
+        rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
       
-      poseEstimator.updateWithTime(moduleInputs[0].timestamps[i], heading, new SwerveModulePosition[] {
+      poseEstimator.updateWithTime(moduleInputs[0].timestamps[i], rawGyroRotation, new SwerveModulePosition[] {
         moduleInputs[0].positionSamples[i],
         moduleInputs[1].positionSamples[i],
         moduleInputs[2].positionSamples[i],
@@ -149,6 +172,35 @@ public class Drivetrain extends SubsystemBase {
     Logger.recordOutput("Robot Position", poseEstimator.getEstimatedPosition());
   }
 
+  private void driveRobotRelative(ChassisSpeeds speeds) {
+    ChassisSpeeds discretizedSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    SwerveModuleState[] targetStates = kinematics.toSwerveModuleStates(discretizedSpeeds);
+
+    // Optimize and find the cosine scale factor
+    double currentScale = 1;
+    for (int i = 0; i < moduleIOs.length; i++) {
+      targetStates[i].optimize(moduleInputs[i].position.angle);
+      currentScale = Math.min(currentScale, Math.abs(moduleIOs[i].getHeading().minus(targetStates[i].angle).getCos()));
+    }
+
+    // Scale all motors down
+    for (int i = 0; i < moduleIOs.length; i++) { 
+      targetStates[i].speedMetersPerSecond *= currentScale;
+    }
+
+    SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, DriveConstants.MAX_SPEED);
+
+    // Apply
+    for (int i = 0; i < moduleIOs.length; i++) {
+      moduleIOs[i].setState(targetStates[i]);
+    }
+  }
+
+  private void driveFieldRelative(ChassisSpeeds speeds) {
+    ChassisSpeeds robotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, poseEstimator.getEstimatedPosition().getRotation());
+    driveRobotRelative(robotRelative);
+  }
+
   public Command driveCommand(Supplier<ChassisSpeeds> speedSupplier) {
     return driveCommand(List.of(speedSupplier));
   }
@@ -162,34 +214,28 @@ public class Drivetrain extends SubsystemBase {
         targetFieldRelativeSpeed = targetFieldRelativeSpeed.plus(speedSupplier.get());
       }
 
-      // Transform to swerve module states
-      ChassisSpeeds targetRobotRelativeSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(targetFieldRelativeSpeed, poseEstimator.getEstimatedPosition().getRotation());
-      ChassisSpeeds discretizedSpeeds = ChassisSpeeds.discretize(targetRobotRelativeSpeed, 0.02);
-      SwerveModuleState[] targetStates = kinematics.toSwerveModuleStates(discretizedSpeeds);
-
-      // Optimize and find the cosine scale factor
-      double currentScale = 1;
-      for (int i = 0; i < moduleIOs.length; i++) {
-        targetStates[i].optimize(moduleInputs[i].position.angle);
-        currentScale = Math.min(currentScale, Math.abs(moduleIOs[i].getHeading().minus(targetStates[i].angle).getCos()));
-      }
-
-      // Scale all motors down
-      for (int i = 0; i < moduleIOs.length; i++) { 
-        targetStates[i].speedMetersPerSecond *= currentScale;
-      }
-
-      SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, DriveConstants.MAX_SPEED);
-
-      // Apply
-      for (int i = 0; i < moduleIOs.length; i++) {
-        moduleIOs[i].setState(targetStates[i]);
-      }
+      driveFieldRelative(targetFieldRelativeSpeed);
     });
   }
 
   public void addVisionMeasurement(Pose2d pose, double timestampSeconds, Matrix<N3, N1> stdDevs) {
     poseEstimator.addVisionMeasurement(pose, timestampSeconds, stdDevs);
+  }
+
+  public void resetPose(Pose2d pose) {
+    SwerveModulePosition[] currentPositions = new SwerveModulePosition[4];
+    for (int i = 0; i < 4; i++) {
+      currentPositions[i] = moduleInputs[i].position != null ? 
+                            moduleInputs[i].position : new SwerveModulePosition();
+    }
+
+    this.rawGyroRotation = pose.getRotation();
+
+    poseEstimator.resetPosition(
+        pose.getRotation(),
+        currentPositions,
+        pose
+    );
   }
 
   public Pose2d getPose() {
@@ -207,7 +253,6 @@ public class Drivetrain extends SubsystemBase {
   public ChassisSpeeds getChassisSpeeds() {
     return currentRobotRelativeChassisSpeeds;
   }
-
 
   // Pre-made drive commands
   public Command driveWithControllerCommand() {

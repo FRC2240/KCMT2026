@@ -9,6 +9,7 @@ import frc.robot.subsystems.feeder.FeederIO;
 import frc.robot.subsystems.feeder.FeederIOReal;
 import frc.robot.subsystems.feeder.FeederIOSim;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drivetrain.DriveSuppliers;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIO;
 import frc.robot.subsystems.drivetrain.GyroIOPigeon2;
@@ -52,6 +53,8 @@ public class RobotContainer {
 
   private final CommandXboxController controller = new CommandXboxController(0);
   private final Drivetrain drivetrain;
+  private final DriveSuppliers suppliers;
+
   @SuppressWarnings("unused")
   private final Vision vision;
   private final Indexer indexer;
@@ -62,15 +65,17 @@ public class RobotContainer {
   private final ShootingController shootingController;
 
   public RobotContainer() {
+    System.out.println(TunerConstants.BackLeft.DriveMotorGains);
+
     switch (Constants.mode) {
       case REAL:
         drivetrain = new Drivetrain(
+            new GyroIOPigeon2(),
             new ModuleIOTalonFX(TunerConstants.FrontLeft),
             new ModuleIOTalonFX(TunerConstants.FrontRight),
             new ModuleIOTalonFX(TunerConstants.BackLeft),
-            new ModuleIOTalonFX(TunerConstants.BackRight),
-            new GyroIOPigeon2(),
-            controller);
+            new ModuleIOTalonFX(TunerConstants.BackRight)
+        );
 
         vision = new Vision(
             drivetrain::addVisionMeasurement,
@@ -87,12 +92,12 @@ public class RobotContainer {
         break;
       case SIM:
         drivetrain = new Drivetrain(
-            new ModuleIOSim(),
-            new ModuleIOSim(),
-            new ModuleIOSim(),
-            new ModuleIOSim(),
             new GyroIO() {},
-            controller);
+            new ModuleIOSim(TunerConstants.FrontLeft),
+            new ModuleIOSim(TunerConstants.FrontRight),
+            new ModuleIOSim(TunerConstants.BackLeft),
+            new ModuleIOSim(TunerConstants.BackRight)
+        );
 
         vision = new Vision(
           drivetrain::addVisionMeasurement, 
@@ -110,12 +115,12 @@ public class RobotContainer {
       default:
       case REPLAY:
         drivetrain = new Drivetrain(
+          new GyroIO() {},
             new ModuleIO() {}, 
             new ModuleIO() {}, 
             new ModuleIO() {}, 
-            new ModuleIO() {}, 
-            new GyroIO() {},
-            controller);
+            new ModuleIO() {}
+        );
 
         vision = new Vision(
           drivetrain::addVisionMeasurement, 
@@ -132,10 +137,12 @@ public class RobotContainer {
         break;
     }
 
+    suppliers = new DriveSuppliers(drivetrain, controller);
+
     indexer.setDefaultCommand(indexer.enableCommand());
     feeder.setDefaultCommand(feeder.enableCommand());
     shooter.setDefaultCommand(shooter.enableCommand());
-    drivetrain.setDefaultCommand(drivetrain.driveWithControllerCommand());
+    drivetrain.setDefaultCommand(drivetrain.driveCommand(List.of(suppliers.controllerDrive(), suppliers.controllerTurn())));
 
     configureDefaults();
     configureBindings();
@@ -157,40 +164,38 @@ public class RobotContainer {
 
   private void configureBindings() {
     // Disable Intake
-    controller.leftTrigger().toggleOnTrue(intakeRoller.disableIntakeCommand());
+    controller.leftTrigger().toggleOnTrue(intakeRoller.disableIntakeCommand()); // Doesnt work
 
     // Toggle Slow Mode
-    controller.back().onTrue(drivetrain.suppliers.toggleSlowModeCommand());
+    controller.back().onTrue(suppliers.toggleSlowModeCommand());
 
     // Zero the Gyro
-    controller.start().onTrue(drivetrain.rezeroGyroCommand());
+    //controller.start().onTrue(drivetrain.rezeroGyroCommand()); // Doesnt work
 
     // Shoot
-    controller.rightTrigger().whileTrue(shootingController.shoot());
+    controller.rightTrigger().whileTrue(shootingController.shoot()); 
 
     // Reverse Intake
     controller.povDown().whileTrue(intakeRoller.reverseIntakeCommand());
 
     // Pivot rezeroing
-    controller.rightBumper().onTrue(intakePivot.rezeroCommand());
+    controller.rightBumper().onTrue(intakePivot.rezeroCommand()); // Needs some work
 
     // Contract Intake
-    controller.x().toggleOnTrue(intakePivot.contractCommand().alongWith(intakeRoller.disableIntakeCommand()));
+    controller.x().toggleOnTrue(intakePivot.contractCommand().alongWith(intakeRoller.disableIntakeCommand())); 
 
     // Align with Trench
-    controller.y().whileTrue(drivetrain.driveCommand(List.of(drivetrain.suppliers.controllerDrive(), 
-                drivetrain.suppliers.trenchAlign()))); 
+    //controller.y().whileTrue(drivetrain.driveCommand(List.of(drivetrain.suppliers.controllerDrive(), 
+     //           drivetrain.suppliers.trenchAlign()))); 
   }
 
   private void configureDefaults() {
-   //Drive with Stick
-    drivetrain.setDefaultCommand(drivetrain.driveWithControllerCommand());
 
     // indexer is disabled by default
     indexer.setDefaultCommand(indexer.disableCommand());
 
     // Intake is enabled by default
-    intakeRoller.setDefaultCommand(intakeRoller.enableIntakeCommand());
+    //intakeRoller.setDefaultCommand(intakeRoller.enableIntakeCommand());
 
     // Feeder is disabled by default
     feeder.setDefaultCommand(feeder.disableCommand());
@@ -199,7 +204,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.coastCommand());
 
     // Pivot is extended by default
-    intakePivot.setDefaultCommand(intakePivot.extendCommand());
+    //intakePivot.setDefaultCommand(intakePivot.extendCommand());
   }
 
   public Command getAutonomousCommand() {

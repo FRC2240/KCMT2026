@@ -30,8 +30,6 @@ public class AllianceRelativeRectangle2d {
      * alliance.
      */
     public static AllianceRelativeRectangle2d fromBlueRectangle(Rectangle2d rectangle) {
-        System.out.println(Field.FIELD_LENGTH.in(Meters));
-        System.out.println(Field.FIELD_WIDTH.in(Meters));
         return new AllianceRelativeRectangle2d(rectangle, flipRectangle(rectangle));
     }
 

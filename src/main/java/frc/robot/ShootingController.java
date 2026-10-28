@@ -134,7 +134,8 @@ public class ShootingController extends SubsystemBase {
         if (isValidDistanceFromHub()) {
             return new ChassisSpeeds();
         }
-        return drivetrain.suppliers.driveToDistanceFromPoint(Field.HUB_CENTER_TRANSLATION::get, () -> NORM_DISTANCE_FROM_HUB).get();
+        return new ChassisSpeeds();
+        //return drivetrain.suppliers.driveToDistanceFromPoint(Field.HUB_CENTER_TRANSLATION::get, () -> NORM_DISTANCE_FROM_HUB).get();
     }
 
     private boolean isShooterAtVelocity(AngularVelocity velocity) {
@@ -186,7 +187,7 @@ public class ShootingController extends SubsystemBase {
                 // drivebase
                 Commands.waitUntil(this::isDrivetrainAimedAtHub).andThen(shooter.setVelocityCommand(this::getShooterHubVelocityForPosition)),
 
-                drivetrain.driveCommand(List.of(this::driveToValidDistanceFromHub, drivetrain.suppliers.rotateToFacePoint(Field.HUB_CENTER_TRANSLATION::get))),
+                //drivetrain.driveCommand(List.of(this::driveToValidDistanceFromHub),
 
                 BetterCommands.runWhen(feed(), this::hubShootRequirementsMet),
                 
@@ -205,8 +206,7 @@ public class ShootingController extends SubsystemBase {
     private Command shootIntoAllianceZone() {
         return Commands.parallel(
                 shooter.setVelocityCommand(this::getShooterPassVelocityForPosition),
-                drivetrain.driveCommand(List.of(drivetrain.suppliers.controllerDrive(),
-                        drivetrain.suppliers.rotateToFacePoint(() -> Field.getTranslationOfPassPoint(drivetrain)))),
+                
 
                 BetterCommands.runWhen(feed(), this::passRequirementsMet),
                 Commands.waitUntil(this::isDrivetrainAimedAtPassPoint).andThen(Commands.waitSeconds(0.8).andThen(intakePivot.rampCommand())),

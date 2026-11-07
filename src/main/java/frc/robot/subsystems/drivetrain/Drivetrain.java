@@ -211,8 +211,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
 
-  public Command driveCommand(List<Supplier<ChassisSpeeds>> suppliers) {
-    return driveCommand(() -> {
+  public Command driveRobotRelativeCommand(List<Supplier<ChassisSpeeds>> suppliers) {
+    return driveRobotRelativeCommand(() -> {
       ChassisSpeeds result = new ChassisSpeeds();
       for (Supplier<ChassisSpeeds> supplier: suppliers) {
         result = result.plus(supplier.get());
@@ -221,11 +221,28 @@ public class Drivetrain extends SubsystemBase {
     });
   }
 
-  public Command driveCommand(Supplier<ChassisSpeeds> speedsSupplier) {
+  public Command driveRobotRelativeCommand(Supplier<ChassisSpeeds> speedsSupplier) {
     return run(() -> {
       runVelocity(speedsSupplier.get());
     });
   }
+
+  public Command driveFieldRelativeCommand(List<Supplier<ChassisSpeeds>> speeds) {
+    return driveRobotRelativeCommand(() -> {
+      ChassisSpeeds result = new ChassisSpeeds();
+      for (Supplier<ChassisSpeeds> supplier: speeds) {
+        result = result.plus(supplier.get());
+      }
+      return ChassisSpeeds.fromFieldRelativeSpeeds(result, this.getRotation());
+    });
+  }
+
+  public Command driveFieldRelativeCommand(Supplier<ChassisSpeeds> speedsSupplier) {
+    return driveRobotRelativeCommand(() -> {
+      return ChassisSpeeds.fromFieldRelativeSpeeds(speedsSupplier.get(), getRotation());
+    });
+  }
+
 
   /** Runs the drive in a straight line with the specified drive output. */
   public void runCharacterization(double output) {

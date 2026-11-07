@@ -142,7 +142,7 @@ public class RobotContainer {
     indexer.setDefaultCommand(indexer.enableCommand());
     feeder.setDefaultCommand(feeder.enableCommand());
     shooter.setDefaultCommand(shooter.enableCommand());
-    drivetrain.setDefaultCommand(drivetrain.driveCommand(List.of(suppliers.controllerDrive(), suppliers.controllerTurn())));
+    drivetrain.setDefaultCommand(drivetrain.driveFieldRelativeCommand(List.of(suppliers.controllerDrive(), suppliers.controllerTurn())));
 
     configureDefaults();
     configureBindings();

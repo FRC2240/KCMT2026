@@ -240,6 +240,17 @@ public class ShootingController extends SubsystemBase {
                 .finallyDo(() -> isCurrentlyShooting = false);
     }
 
+    public Command testShoot() {
+        return Commands.parallel(
+                indexer.enableCommand(),
+                feeder.enableCommand(),
+                Commands.waitSeconds(0.5),
+                shooter.testSpinCommand(),
+                intakePivot.rampCommand()
+        );
+    }
+
+
     /**
      * Publishes a trajectory to network tables with a line from the robot to it's
      * potential target

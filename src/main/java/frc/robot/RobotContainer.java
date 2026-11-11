@@ -173,7 +173,8 @@ public class RobotContainer {
     //controller.start().onTrue(drivetrain.rezeroGyroCommand()); // Doesnt work
 
     // Shoot
-    controller.rightTrigger().whileTrue(shootingController.shoot()); 
+    //controller.rightTrigger().whileTrue(shootingController.shoot()); 
+    controller.rightTrigger().whileTrue(shootingController.testShoot());
 
     // Reverse Intake
     controller.povDown().whileTrue(intakeRoller.reverseIntakeCommand());

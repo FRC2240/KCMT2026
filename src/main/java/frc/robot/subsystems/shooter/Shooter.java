@@ -48,8 +48,13 @@ public class Shooter extends SubsystemBase {
     public Command disableCommand() {
         return setVelocityCommand(RotationsPerSecond.of(0));
     }
+
     public Command enableCommand() {
         return setVelocityCommand(RotationsPerSecond.of(10));
+    }
+
+    public Command testSpinCommand() {
+        return setVelocityCommand(RotationsPerSecond.of(40));
     }
 
     public AngularVelocity getVelocity() {

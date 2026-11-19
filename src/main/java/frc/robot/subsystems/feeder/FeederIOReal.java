@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class FeederIOReal implements FeederIO {
-    private TalonFX feedMotor = new TalonFX(0);
+    private TalonFX feedMotor = new TalonFX(FeederConstants.FEEDER_MOTOR_ID);
     private StatusSignal<AngularVelocity> velocity = feedMotor.getVelocity();
     private VelocityTorqueCurrentFOC velocityControl = new VelocityTorqueCurrentFOC(0);
 

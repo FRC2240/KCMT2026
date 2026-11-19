@@ -196,7 +196,7 @@ public class RobotContainer {
     indexer.setDefaultCommand(indexer.disableCommand());
 
     // Intake is enabled by default
-    //intakeRoller.setDefaultCommand(intakeRoller.enableIntakeCommand());
+    intakeRoller.setDefaultCommand(intakeRoller.enableIntakeCommand());
 
     // Feeder is disabled by default
     feeder.setDefaultCommand(feeder.disableCommand());
@@ -205,7 +205,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.coastCommand());
 
     // Pivot is extended by default
-    //intakePivot.setDefaultCommand(intakePivot.extendCommand());
+    intakePivot.setDefaultCommand(intakePivot.extendCommand());
   }
 
   public Command getAutonomousCommand() {

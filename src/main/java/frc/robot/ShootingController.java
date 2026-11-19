@@ -241,11 +241,11 @@ public class ShootingController extends SubsystemBase {
     }
 
     public Command testShoot() {
-        return Commands.parallel(
+        return Commands.parallel( //make the first 3 sequencial then the next parrallel
+                shooter.testSpinCommand(),
+                Commands.waitSeconds(0.8),
                 indexer.enableCommand(),
                 feeder.enableCommand(),
-                Commands.waitSeconds(0.5),
-                shooter.testSpinCommand(),
                 intakePivot.rampCommand()
         );
     }

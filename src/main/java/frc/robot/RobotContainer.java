@@ -43,6 +43,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -82,8 +83,8 @@ public class RobotContainer {
             new CameraIOLimelight("limelight-left", drivetrain::getRotation),
             new CameraIOLimelight("limelight-right", drivetrain::getRotation));
         
-        indexer = new Indexer(new IndexerIOTalonFX());
-        shooter = new Shooter(new ShooterIOTalonFX());
+        indexer = new Indexer(new IndexerIOSim());
+        shooter = Shooter(new ShooterIOTalonFX());
         feeder = new Feeder(new FeederIOReal());
         intakePivot = new IntakePivot(new IntakePivotIOReal());
         intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX(), drivetrain);
@@ -179,7 +180,7 @@ public class RobotContainer {
     controller.povDown().whileTrue(intakeRoller.reverseIntakeCommand());
 
     // Pivot rezeroing
-    controller.rightBumper().onTrue(intakePivot.rezeroCommand()); // Needs some work
+    XboxController.Button.kA.onTrue(intakePivot.rezeroCommand()); // Needs some work
 
     // Contract Intake
     controller.x().toggleOnTrue(intakePivot.contractCommand().alongWith(intakeRoller.disableIntakeCommand())); 

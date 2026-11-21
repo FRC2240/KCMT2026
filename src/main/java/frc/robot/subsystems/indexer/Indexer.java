@@ -48,7 +48,7 @@ public class Indexer extends SubsystemBase {
         return run(() -> {
             boolean enabled = enabledSupplier.get();
             if (enabled) {
-                setVelocity(IndexerConstants.ENABLED_VELOCITY);
+                setVelocity(0);
             } else {
                 setVelocity(RotationsPerSecond.of(0));
             }
@@ -56,6 +56,6 @@ public class Indexer extends SubsystemBase {
     }
 
     public Command disableCommand() {
-        return setVelocityCommand(RotationsPerSecond.of(0));
+        return setVelocityCommand(RotationsPerSecond.of(IndexerConstants.ENABLED_VELOCITY));
     }
 }

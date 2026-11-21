@@ -28,7 +28,7 @@ public class IntakePivot extends SubsystemBase {
   }
 
   public void ramp() {
-    io.setPosition(IntakePivotConstants.PIVOT_RAMP_POSITION);
+    this.setPosition(IntakePivotConstants.PIVOT_RAMP_POSITION);
   }
 
   public Command extendCommand() {

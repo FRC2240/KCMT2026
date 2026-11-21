@@ -23,7 +23,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         conf.Slot0.kP = 4;
 
         conf.CurrentLimits.SupplyCurrentLimit = 100;
-        conf.CurrentLimits.StatorCurrentLimit = 100;
+        conf.CurrentLimits.StatorCurrentLimit = 10;
 
         motor.getConfigurator().apply(conf);
     }
@@ -31,7 +31,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     @Override
     public void updateInputs(IndexerIOInputs inputs) {
         BaseStatusSignal.refreshAll(velocity, statorCurrent, supplyCurrent);
-        inputs.indexerSpinVelocity = velocity.getValue();
+        inputs.indexerSpinVelocity = velocity.get();
         inputs.statorCurrent = statorCurrent.getValue();
         inputs.supplyCurrent = supplyCurrent.getValue();
     }

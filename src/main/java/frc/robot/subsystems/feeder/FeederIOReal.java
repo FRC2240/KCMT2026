@@ -2,15 +2,16 @@ package frc.robot.subsystems.feeder;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class FeederIOReal implements FeederIO {
-    private TalonFX feedMotor = new TalonFX(FeederConstants.FEEDER_MOTOR_ID);
+    private TalonFX feedMotor = new TalonFX(0);
     private StatusSignal<AngularVelocity> velocity = feedMotor.getVelocity();
-    private VelocityTorqueCurrentFOC velocityControl = new VelocityTorqueCurrentFOC(0);
+    private VelocityTorqueCurrentFOC velocityControl = new PositionTorqueCurrentFOC(0);
 
     public FeederIOReal() {
         TalonFXConfiguration config = new TalonFXConfiguration();

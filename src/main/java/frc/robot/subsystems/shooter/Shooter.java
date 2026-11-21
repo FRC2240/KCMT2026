@@ -26,7 +26,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setVelocity(AngularVelocity velocity) {
-        io.setVelocity(velocity);
+        io.setVelocity(RotationsPerSecond.of(velocity));
     }
 
     // For acually doing stuff

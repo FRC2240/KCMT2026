@@ -55,7 +55,7 @@ public class ShooterIOTalonFX implements ShooterIO {
             new Follower(ShooterConstants.LEFT_UPPER_FLYWHEEL_MOTOR_ID, MotorAlignmentValue.Opposed));
         
         rightFlywheelFollowerLower.setControl(
-            new Follower(ShooterConstants.LEFT_UPPER_FLYWHEEL_MOTOR_ID, MotorAlignmentValue.Opposed));
+            Follower(ShooterConstants.LEFT_UPPER_FLYWHEEL_MOTOR_ID, MotorAlignmentValue.Opposed));
 
         leftFlywheelMotor.getConfigurator().apply(conf);
         leftFlywheelFollower.getConfigurator().apply(conf);

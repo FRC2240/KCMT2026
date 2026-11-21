@@ -50,7 +50,6 @@ public class IntakeRollerIOTalonFX implements IntakeRollerIO {
         inputs.followerSupplyCurrent = followerSupply.getValue();
     }
 
-    @Override
     public void setVelocity(AngularVelocity velocity) {
         intakeMotor.setControl(req.withVelocity(velocity));
     }

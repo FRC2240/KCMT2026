@@ -3,10 +3,13 @@ package frc.robot.subsystems.feeder;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
+
+import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -27,8 +30,8 @@ private FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged ();
   );
  }
 
- public void setVelocity(AngularVelocity velocity) {
-    io.setVelocity(velocity);
+ public void setVelocity(double velocity) {
+    io.setVelocity(RotationsPerSecond.of(velocity));
  }
 
  public Command setVelocityCommand(Supplier<AngularVelocity> velocity) {
@@ -36,7 +39,7 @@ private FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged ();
 }
 
 public Command enableCommand() {
-    return runOnce(() -> setVelocity(FeederConstants.ENABLED_VELOCITY));
+    return Commands.runOnce(() -> setVelocity(FeederConstants.ENABLED_VELOCITY));
 }
 public Command disableCommand() {
     return runOnce(() -> setVelocity(RotationsPerSecond.of(0)));
